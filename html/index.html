@@ -132,11 +132,15 @@ function plotPolar(canvasId) {
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
 
-    // Center circle
+    // Center circle and cross
     ctx.beginPath();
     ctx.arc(centerX, centerY, amplitudePx, 
             0, 2 * Math.PI);
-    ctx.strokeStyle = "lightgray";
+    ctx.moveTo(centerX - amplitudePx, centerY);
+    ctx.lineTo(centerX + amplitudePx, centerY);
+    ctx.moveTo(centerX, centerY - amplitudePx);
+    ctx.lineTo(centerX, centerY + amplitudePx);
+    ctx.strokeStyle = "goldenrod";
     ctx.lineWidth = 2;
     ctx.stroke();
 
