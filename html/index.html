@@ -1,0 +1,173 @@
+<html>
+<meta charset="utf-8"/>
+<head>
+<title>IQ Data Studio</title>
+<style>
+
+canvas {
+    border:1px solid #000000;
+    margin-bottom: 5px;
+}
+
+.select-container {
+    display: inline-block;
+    border:1px solid lightgray;
+    margin: 2px 0px 2px 0px;
+    padding: 5px 5px 0px 5px;
+}
+
+.select-label {
+    display: inline-block;
+    width: 20px;
+    text-align:center;
+}
+
+#I_number, #Q_number {
+    float: right;
+}
+
+</style>
+</head>
+<script>
+
+//////////////////////////////////////////////////////////
+// Globals
+//////////////////////////////////////////////////////////
+
+const DEG_TO_RAD = Math.PI / 180;
+
+var I_value = 1;
+var Q_value = 1;
+
+//////////////////////////////////////////////////////////
+// Functions
+//////////////////////////////////////////////////////////
+
+window.onload = function() {
+    updateDisplay();
+
+    // Synchronize range and number inputs - I
+    var I_range = document.getElementById("I_range");
+    var I_number = document.getElementById("I_number");
+    I_range.addEventListener('input', function (e) {
+        I_value = e.target.value
+        I_number.value = I_value;
+    });
+    I_number.addEventListener('input', function (e) {
+        I_value = e.target.value
+        I_range.value = I_value;
+    });
+
+    // Synchronize range and number inputs - Q
+    var Q_range = document.getElementById("Q_range");
+    var Q_number = document.getElementById("Q_number");
+    Q_range.addEventListener('input', function (e) {
+        Q_value = e.target.value
+        Q_number.value = Q_value;
+    });
+    Q_number.addEventListener('input', function (e) {
+        Q_value = e.target.value
+        Q_range.value = Q_value;
+    });
+}
+
+function updateDisplay() {
+    var canvas = document.getElementsByClassName("signal-plot");
+    var width = document.body.offsetWidth;
+    for (var i = 0; i < canvas.length ; i++) {
+        canvas[i].height = 200;
+        canvas[i].width = width;
+    }
+    plot("I_Signal");
+}
+
+function plot(canvasId) {
+    var canvas = document.getElementById(canvasId);
+    var ctx = canvas.getContext("2d");
+
+    var offsetPx = 5;
+    plotGrid(ctx, canvas.width, canvas.height, 10);
+    plotSin(ctx, canvas.height / 2 - 20, 100, 0, canvas.height / 2, 
+            offsetPx, canvas.width - offsetPx, "red");
+    plotSin(ctx, canvas.height / 2 - 10, 100, -90, canvas.height / 2, 
+    offsetPx, canvas.width - offsetPx, "blue");
+}
+
+function plotGrid(ctx, width, height, space) {
+    ctx.strokeStyle = "lightgray";
+    ctx.beginPath();
+
+    // Horizontal lines
+    var nbrHorLines = height / space - 1;
+    for (var i = 1 ; i <= nbrHorLines ; i++) {
+        ctx.moveTo(0, i * space);
+        ctx.lineTo(width, i * space);
+    }
+ 
+    // Vertical lines lines
+    var nbrVerLines = width / space - 1;
+    for (var i = 1 ; i <= nbrVerLines ; i++) {
+        ctx.moveTo(i * space, 0);
+        ctx.lineTo(i * space, height);
+    }
+
+    ctx.lineWidth = 1;
+    ctx.stroke();    
+
+
+    // Centre line (thicker)
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.lineWidth = 2;
+    ctx.stroke();    
+}
+
+function plotSin(ctx, amplitudePx, periodPx, phaseDeg, startY, startX, endX,
+                 color) {
+    var angle = -1;
+    var x = 0;
+    var firstPoint = true;
+    ctx.beginPath();
+    while(x < endX) {
+        angle++;
+        y = amplitudePx * Math.sin(angle * DEG_TO_RAD + phaseDeg) + startY;
+        x = angle * periodPx / 360 + startX;
+        if (firstPoint) {
+            ctx.moveTo(x, y);
+            firstPoint = false;
+        }
+        else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function IRangeChange() {
+    alert("Changed");
+}
+
+</script>
+
+<body onresize="updateDisplay()">
+
+    <div class="select-container">
+        <div class="select-label"><b style="color:red">I</b></div>
+        <input id="I_number" type="number" id="quantity" name="quantity" min="-1" max="1" value="1" step="0.01" size="4"><br>
+        <input id="I_range" type="range" min="-1" max="1" value="1" step="0.01">
+    </div>
+    <div class="select-container">
+        <div class="select-label"><b style="color:blue">Q</b></div>
+        <input id="Q_number" type="number" id="quantity" name="quantity" min="-1" max="1" value="1" step="0.01" size="4"><br>
+        <input id="Q_range" type="range" min="-1" max="1" value="1" step="0.01">
+    </div>
+
+    <canvas id="I_Signal" class="signal-plot"></canvas>
+    <!--<canvas id="Q_Signal"></canvas>
+    <canvas id="RF_Signal"></canvas>-->
+
+</body>
+</html>
