@@ -85,12 +85,12 @@ window.onload = function() {
         var centerY = polar_canvas.height / 2;
 
 
-        var I_value = (centerY - event.offsetY) / amplitudePx;
+        var I_value = (event.offsetX - centerX) / amplitudePx;
         I_value = Math.round(I_value * 100) / 100;
         I_value = Math.min(I_value, 1);
         I_value = Math.max(I_value, -1);
 
-        var Q_value = (event.offsetX - centerX) / amplitudePx;
+        var Q_value = (centerY - event.offsetY) / amplitudePx;
         Q_value = Math.round(Q_value * 100) / 100;
         Q_value = Math.min(Q_value, 1);
         Q_value = Math.max(Q_value, -1);
@@ -146,18 +146,20 @@ function plotPolar(canvasId) {
 
     // I line
     ctx.beginPath();
-    ctx.moveTo(centerX, centerY - (I_value * amplitudePx));
-    ctx.lineTo(centerX + (Q_value * amplitudePx), 
-               centerY - (I_value * amplitudePx));
+    ctx.moveTo(centerX, 
+               centerY - (Q_value * amplitudePx));
+    ctx.lineTo(centerX + (I_value * amplitudePx), 
+               centerY - (Q_value * amplitudePx));
     ctx.strokeStyle = "red";
     ctx.lineWidth = 2;
     ctx.stroke();
 
     // Q line
     ctx.beginPath();
-    ctx.moveTo(centerX + (Q_value * amplitudePx), centerY);
-    ctx.lineTo(centerX + (Q_value * amplitudePx), 
-               centerY - (I_value * amplitudePx));
+    ctx.moveTo(centerX + (I_value * amplitudePx), 
+               centerY);
+    ctx.lineTo(centerX + (I_value * amplitudePx), 
+               centerY - (Q_value * amplitudePx));
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
     ctx.stroke();  
@@ -165,8 +167,8 @@ function plotPolar(canvasId) {
     // RF line
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
-    ctx.lineTo(centerX + (Q_value * amplitudePx), 
-               centerY - (I_value * amplitudePx));
+    ctx.lineTo(centerX + (I_value * amplitudePx), 
+               centerY - (Q_value * amplitudePx));
     ctx.strokeStyle = "green";
     ctx.lineWidth = 2;
     ctx.stroke();      
