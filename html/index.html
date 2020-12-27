@@ -76,17 +76,69 @@ window.onload = function() {
 }
 
 function updateDisplay() {
-    var canvas = document.getElementsByClassName("signal-plot");
     var width = document.body.offsetWidth;
-    for (var i = 0; i < canvas.length ; i++) {
-        canvas[i].height = 200;
-        canvas[i].width = width;
-    }
-    
-    plot("signal-canvas");
+    var polar_canvas = document.getElementById("polar-canvas");
+    var signal_canvas = document.getElementById("signal-canvas");
+    signal_canvas.width = width - polar_canvas.width - 20;
+
+    plotPolar("polar-canvas");
+    plotSignals("signal-canvas");
 }
 
-function plot(canvasId) {
+function plotPolar(canvasId) {
+    var I_value = document.getElementById("I_number").value;
+    var Q_value = document.getElementById("Q_number").value;
+
+    var canvas = document.getElementById(canvasId);
+    var ctx = canvas.getContext("2d");
+
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    plotGrid(ctx, canvas.width, canvas.height, 10, true);
+
+    var amplitudePx = canvas.height / 2 - 32;
+    var centerX = canvas.width / 2;
+    var centerY = canvas.height / 2;
+
+    // Center circle
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, amplitudePx, 
+            0, 2 * Math.PI);
+    ctx.strokeStyle = "lightgray";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // I line
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY - (I_value * amplitudePx));
+    ctx.lineTo(centerX + (Q_value * amplitudePx), 
+               centerY - (I_value * amplitudePx));
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Q line
+    ctx.beginPath();
+    ctx.moveTo(centerX + (Q_value * amplitudePx), centerY);
+    ctx.lineTo(centerX + (Q_value * amplitudePx), 
+               centerY - (I_value * amplitudePx));
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.stroke();  
+    
+    // RF line
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(centerX + (Q_value * amplitudePx), 
+               centerY - (I_value * amplitudePx));
+    ctx.strokeStyle = "green";
+    ctx.lineWidth = 2;
+    ctx.stroke();      
+
+}
+
+function plotSignals(canvasId) {
     var I_value = document.getElementById("I_number").value;
     var Q_value = document.getElementById("Q_number").value;
     var I_plot = document.getElementById("I_plot").checked;
@@ -97,13 +149,14 @@ function plot(canvasId) {
     var canvas = document.getElementById(canvasId);
     var ctx = canvas.getContext("2d");
 
+    plotGrid(ctx, canvas.width, canvas.height, 10, false);
 
     var offsetPx = 5;
     var amplitudePx = canvas.height / 2 - 32;
     var periodPx = 100;
     var startY = canvas.height / 2;
     var endX = canvas.width - offsetPx;
-    plotGrid(ctx, canvas.width, canvas.height, 10);
+
 
     Carrier_func = function (angle) {
         return amplitudePx * Math.cos(angle * DEG_TO_RAD);
@@ -142,7 +195,7 @@ function plot(canvasId) {
     }
 }
 
-function plotGrid(ctx, width, height, space) {
+function plotGrid(ctx, width, height, space, includeVertical) {
     ctx.strokeStyle = "lightgray";
     ctx.beginPath();
 
@@ -164,12 +217,21 @@ function plotGrid(ctx, width, height, space) {
     ctx.stroke();    
 
 
-    // Centre line (thicker)
+    // Horizontal Centre line (thicker)
     ctx.beginPath();
     ctx.moveTo(0, height / 2);
     ctx.lineTo(width, height / 2);
     ctx.lineWidth = 2;
-    ctx.stroke();    
+    ctx.stroke(); 
+
+    // Vertical Centre line (thicker)
+    if (includeVertical) {
+        ctx.beginPath();
+        ctx.moveTo(width / 2, 0);
+        ctx.lineTo(width / 2, height);
+        ctx.lineWidth = 2;
+        ctx.stroke();     
+    }
 }
 
 function plotFunc(ctx, periodPx, startY, startX, endX,
@@ -212,7 +274,7 @@ function plotFunc(ctx, periodPx, startY, startX, endX,
         <input id="Q_number" type="number" id="quantity" name="quantity" min="-1" max="1" value="0" step="0.01" size="4">
         <input id="Q_plot" type="checkbox" checked onchange="updateDisplay()">
         <br>
-        <input id="Q_range" type="range" min="-1" max="1" value="1" step="0.01">
+        <input id="Q_range" type="range" min="-1" max="1" value="0" step="0.01">
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:lightgreen">Carrier</b></div>
@@ -221,8 +283,9 @@ function plotFunc(ctx, periodPx, startY, startX, endX,
         <div class="select-label"><b style="color:green">RF</b></div>
         <input id="RF_plot" type="checkbox" checked onchange="updateDisplay()">
     </div>
-
-    <canvas id="signal-canvas" class="signal-plot"></canvas>
+    <br>
+    <canvas id="polar-canvas" height="200" width="200"></canvas>
+    <canvas id="signal-canvas" height="200"></canvas>
 
 </body>
 </html>
