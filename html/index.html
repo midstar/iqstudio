@@ -13,7 +13,7 @@ canvas {
     cursor: crosshair;
 }
 
-.select-container {
+.select-container, .notation-container {
     display: inline-block;
     vertical-align: top;
     border:1px solid lightgray;
@@ -25,6 +25,10 @@ canvas {
     display: inline-block;
     width: 60px;
     text-align:center;
+}
+
+.notation-container {
+    font-size: 10px;
 }
 
 #I_range, #Q_range {
@@ -112,8 +116,33 @@ function updateDisplay() {
     var signal_canvas = document.getElementById("signal-canvas");
     signal_canvas.width = width - polar_canvas.width - 20;
 
+    updateNotation();
     plotPolar("polar-canvas");
     plotSignals("signal-canvas");
+}
+
+function updateNotation() {
+    var I_value = document.getElementById("I_number").value;
+    var Q_value = document.getElementById("Q_number").value;
+    var rect_notation = document.getElementById("rect-notation");
+    var polar_notation = document.getElementById("polar-notation");
+
+    if (Q_value >= 0) 
+        rect_notation.innerHTML = I_value + " + " + Q_value + " i";
+    else
+        rect_notation.innerHTML = I_value + " - " + Math.abs(Q_value) + " i";
+    
+    var RF_amplitude = Math.round(Math.hypot(I_value, Q_value) * 100)/100;
+    var RF_angle = Math.round(Math.atan(Q_value / I_value) * 100)/100;
+    if (I_value < 0)
+        RF_angle = Math.PI + RF_angle;
+    else if (Q_value < 0)
+        RF_angle = 2 * Math.PI + RF_angle;
+
+    RF_angle = Math.round(RF_angle * 100)/100;
+
+    polar_notation.innerHTML = RF_amplitude + ", " + RF_angle + " radians";
+
 }
 
 function plotPolar(canvasId) {
@@ -136,13 +165,20 @@ function plotPolar(canvasId) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, amplitudePx, 
             0, 2 * Math.PI);
-    ctx.moveTo(centerX - amplitudePx, centerY);
-    ctx.lineTo(centerX + amplitudePx, centerY);
-    ctx.moveTo(centerX, centerY - amplitudePx);
-    ctx.lineTo(centerX, centerY + amplitudePx);
+    ctx.moveTo(centerX - amplitudePx * 1.1, centerY);
+    ctx.lineTo(centerX + amplitudePx * 1.1, centerY);
+    ctx.moveTo(centerX, centerY - amplitudePx * 1.1);
+    ctx.lineTo(centerX, centerY + amplitudePx * 1.1);
     ctx.strokeStyle = "goldenrod";
     ctx.lineWidth = 2;
     ctx.stroke();
+
+    // I/Q label
+    ctx.font = "10px Arial";
+    ctx.strokeStyle = "black";
+    ctx.strokeText("I", amplitudePx * 1.2 + centerX, centerY + 4);
+    ctx.strokeText("Q", centerX - 4, centerY - amplitudePx * 1.2);
+
 
     // I line
     ctx.beginPath();
@@ -319,6 +355,14 @@ function plotFunc(ctx, periodPx, startY, startX, endX,
         <br>
         <div class="select-label"><b style="color:green">RF</b></div>
         <input id="RF_plot" type="checkbox" checked onchange="updateDisplay()">
+    </div>
+    <div class="notation-container">
+        <div><b>Rectangular notation:</b></div>
+        <div id="rect-notation">0.45 + 0.66 * i</div>
+    </div>
+    <div class="notation-container">
+        <div><b>Polar notation:</b></div>
+        <div id="polar-notation">0.45, 2.3 radians</div>
     </div>
     <br>
     <canvas id="polar-canvas" height="200" width="200"></canvas>
