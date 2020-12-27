@@ -9,6 +9,10 @@ canvas {
     margin-bottom: 5px;
 }
 
+#polar-canvas {
+    cursor: crosshair;
+}
+
 .select-container {
     display: inline-block;
     vertical-align: top;
@@ -73,6 +77,33 @@ window.onload = function() {
         updateDisplay();
     });
 
+    // Handle click in the polar canvas
+    var polar_canvas = document.getElementById("polar-canvas");
+    polar_canvas.addEventListener('click', function (e) {
+        var amplitudePx = (polar_canvas.height / 2) / Math.sqrt(2);
+        var centerX = polar_canvas.width / 2;
+        var centerY = polar_canvas.height / 2;
+
+
+        var I_value = (centerY - event.offsetY) / amplitudePx;
+        I_value = Math.round(I_value * 100) / 100;
+        I_value = Math.min(I_value, 1);
+        I_value = Math.max(I_value, -1);
+
+        var Q_value = (event.offsetX - centerX) / amplitudePx;
+        Q_value = Math.round(Q_value * 100) / 100;
+        Q_value = Math.min(Q_value, 1);
+        Q_value = Math.max(Q_value, -1);
+
+        I_number.value = I_value;
+        I_range.value  = I_value;
+
+        Q_number.value = Q_value;
+        Q_range.value  = Q_value;
+
+        updateDisplay();
+    });
+
 }
 
 function updateDisplay() {
@@ -97,7 +128,7 @@ function plotPolar(canvasId) {
 
     plotGrid(ctx, canvas.width, canvas.height, 10, true);
 
-    var amplitudePx = canvas.height / 2 - 32;
+    var amplitudePx = (canvas.height / 2) / Math.sqrt(2);
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
 
@@ -152,7 +183,7 @@ function plotSignals(canvasId) {
     plotGrid(ctx, canvas.width, canvas.height, 10, false);
 
     var offsetPx = 5;
-    var amplitudePx = canvas.height / 2 - 32;
+    var amplitudePx = (canvas.height / 2) / Math.sqrt(2);
     var periodPx = 100;
     var startY = canvas.height / 2;
     var endX = canvas.width - offsetPx;
