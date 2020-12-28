@@ -49,6 +49,7 @@ canvas {
 //////////////////////////////////////////////////////////
 
 const DEG_TO_RAD = Math.PI / 180;
+const RAD_TO_DEG = 180 / Math.PI;
 
 //////////////////////////////////////////////////////////
 // Functions
@@ -61,44 +62,40 @@ window.onload = function() {
     var I_range = document.getElementById("I_range");
     var I_number = document.getElementById("I_number");
     I_range.addEventListener('input', function (e) {
-        I_set(e.target.value);
+        I_set_all(e.target.value);
     });
     I_number.addEventListener('input', function (e) {
-        I_set(e.target.value);
+        I_set_all(e.target.value);
     });
 
     // Synchronize range and number inputs - Q
     var Q_range = document.getElementById("Q_range");
     var Q_number = document.getElementById("Q_number");
     Q_range.addEventListener('input', function (e) {
-        Q_set(e.target.value);
+        Q_set_all(e.target.value);
     });
     Q_number.addEventListener('input', function (e) {
-        Q_set(e.target.value);
+        Q_set_all(e.target.value);
     });
 
     // Synchronize range and number inputs - Mag
     var Mag_range = document.getElementById("Mag_range");
     var Mag_number = document.getElementById("Mag_number");
     Mag_range.addEventListener('input', function (e) {
-        Mag_number.value = e.target.value;
-        updateDisplay();
+        Mag_set_all(e.target.value);
     });
     Mag_number.addEventListener('input', function (e) {
-        Mag_range.value = e.target.value;
-        updateDisplay();
+        Mag_set_all(e.target.value);
     });
 
     // Synchronize range and number inputs - Ang
     var Ang_range = document.getElementById("Ang_range");
     var Ang_number = document.getElementById("Ang_number");
     Ang_range.addEventListener('input', function (e) {
-        Ang_number.value = e.target.value;
-        updateDisplay();
+        Ang_set_all(e.target.value);
     });
     Ang_number.addEventListener('input', function (e) {
-        Ang_range.value = e.target.value;
-        updateDisplay();
+        Ang_set_all(e.target.value);
     });
 
     // Handle click in the polar canvas
@@ -333,32 +330,106 @@ function round(value) {
     return Math.round(value * 100) / 100;
 }
 
+// Just update the I value in the controls
 function I_set(I_value) {
+    I_value = round(I_value);
     document.getElementById("I_number").value = I_value;
     document.getElementById("I_range").value = I_value;
+}
+
+// Just update the Q value in the controls
+function Q_set(Q_value) {
+    Q_value = round(Q_value);
+    document.getElementById("Q_number").value = Q_value;
+    document.getElementById("Q_range").value = Q_value;
+}
+
+// Just update the Mag value in the controls
+function Mag_set(Mag_value) {
+    Mag_value = round(Mag_value);
+    document.getElementById("Mag_number").value = Mag_value;
+    document.getElementById("Mag_range").value = Mag_value;
+}
+
+// Just update the Ang value in the controls
+function Ang_set(Ang_value) {
+    Ang_value = round(Ang_value);
+    document.getElementById("Ang_number").value = Ang_value;
+    document.getElementById("Ang_range").value = Ang_value;
+}
+
+function Mag_calc(I_value, Q_value) {
+    return Math.hypot(I_value, Q_value);
+}
+
+function Ang_calc(I_value, Q_value) {
+    var ang = Math.atan(Q_value / I_value);
+    if (I_value < 0)
+        ang = Math.PI + ang;
+    else if (Q_value < 0)
+        ang = 2 * Math.PI + ang;
+        
+    return ang * RAD_TO_DEG;
+}
+
+// Update I value and other entities as well
+function I_set_all(I_value) {
+    I_set(I_value);
 
     // Secure that Mag is <= 1 by if needed reduce Q
     var Q_value = document.getElementById("Q_number").value;
-    if (Math.hypot(I_value, Q_value) > 1) {
-        Q_value = round(Math.sqrt(1 - I_value * I_value) * Math.sign(Q_value));
-        document.getElementById("Q_number").value = Q_value;
-        document.getElementById("Q_range").value = Q_value;
+    if (Mag_calc(I_value, Q_value) > 1) {
+        Q_value = Math.sqrt(1 - I_value * I_value) * Math.sign(Q_value);
+        Q_set(Q_value);
     }
+
+    Mag_set(Mag_calc(I_value, Q_value));
+    Ang_set(Ang_calc(I_value, Q_value));
 
     updateDisplay();
 }
 
-function Q_set(Q_value) {
-    document.getElementById("Q_number").value = Q_value;
-    document.getElementById("Q_range").value = Q_value;
+// Update Q value and other entities as well
+function Q_set_all(Q_value) {
+    Q_set(Q_value);
 
     // Secure that Mag is <= 1 by if needed reduce Q
     var I_value = document.getElementById("I_number").value;
-    if (Math.hypot(I_value, Q_value) > 1) {
-        I_value = round(Math.sqrt(1 - Q_value * Q_value) * Math.sign(I_value));
-        document.getElementById("I_number").value = I_value;
-        document.getElementById("I_range").value = I_value;
+    if (Mag_calc(I_value, Q_value) > 1) {
+        I_value = Math.sqrt(1 - Q_value * Q_value) * Math.sign(I_value);
+        I_set(I_value);
     }
+
+    Mag_set(Mag_calc(I_value, Q_value));
+    Ang_set(Ang_calc(I_value, Q_value));
+
+    updateDisplay();
+}
+
+// Update Magnitude value and other entities as well
+function Mag_set_all(Mag_value) {
+    Mag_set(Mag_value);
+
+    // Keep angle the same update I and Q
+    IQ_set_from_Mag_Ang();
+}
+
+// Update Angle value and other entities as well
+function Ang_set_all(Ang_value) {
+    Ang_set(Ang_value);
+
+    // Keep magnitude a the same update I and Q
+    IQ_set_from_Mag_Ang();
+}
+
+function IQ_set_from_Mag_Ang() {
+    var Mag_value = document.getElementById("Mag_number").value;
+    var Ang_value = document.getElementById("Ang_number").value;
+    var I_value = Mag_value * Math.cos(Ang_value * DEG_TO_RAD);
+    var Q_value = Mag_value * Math.sin(Ang_value * DEG_TO_RAD);
+
+    I_set(I_value);
+    Q_set(Q_value);
 
     updateDisplay();
 }
@@ -444,7 +515,7 @@ function polarXYtoIQ(x, y) {
         <div class="select-label"><b style="color:goldenrod">Ang</b></div>
         <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="0.01" size="4">
         <br>
-        <input id="Ang_range" type="range" min="0" max="360" value="1" step="0.1">
+        <input id="Ang_range" type="range" min="0" max="360" value="1" step="0.01">
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:lightgreen">Carrier</b></div>
