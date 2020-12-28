@@ -175,9 +175,10 @@ function plotPolar(canvasId) {
     ctx.stroke();
 
     // I/Q label
-    ctx.font = "10px Arial";
-    ctx.strokeStyle = "black";
+    ctx.font = "10px Arial Narrow";
+    ctx.strokeStyle = "red";
     ctx.strokeText("I", amplitudePx * 1.2 + centerX, centerY + 4);
+    ctx.strokeStyle = "blue";
     ctx.strokeText("Q", centerX - 4, centerY - amplitudePx * 1.2);
 
 
