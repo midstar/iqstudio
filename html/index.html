@@ -332,30 +332,39 @@ function round(value) {
 
 // Just update the I value in the controls
 function I_set(I_value) {
+    I_value = Math.min(I_value, 1);
+    I_value = Math.max(I_value, -1);
     I_value = round(I_value);
     document.getElementById("I_number").value = I_value;
     document.getElementById("I_range").value = I_value;
+    return I_value;
 }
 
 // Just update the Q value in the controls
 function Q_set(Q_value) {
+    Q_value = Math.min(Q_value, 1);
+    Q_value = Math.max(Q_value, -1);
     Q_value = round(Q_value);
     document.getElementById("Q_number").value = Q_value;
     document.getElementById("Q_range").value = Q_value;
+    return Q_value;
 }
 
 // Just update the Mag value in the controls
 function Mag_set(Mag_value) {
+    Mag_value = Math.min(Mag_value, 1);
     Mag_value = round(Mag_value);
     document.getElementById("Mag_number").value = Mag_value;
     document.getElementById("Mag_range").value = Mag_value;
+    return Mag_value;
 }
 
 // Just update the Ang value in the controls
 function Ang_set(Ang_value) {
-    Ang_value = round(Ang_value);
+    Ang_value = Math.round(Ang_value);
     document.getElementById("Ang_number").value = Ang_value;
     document.getElementById("Ang_range").value = Ang_value;
+    return Ang_value;
 }
 
 function Mag_calc(I_value, Q_value) {
@@ -374,7 +383,7 @@ function Ang_calc(I_value, Q_value) {
 
 // Update I value and other entities as well
 function I_set_all(I_value) {
-    I_set(I_value);
+    I_value = I_set(I_value);
 
     // Secure that Mag is <= 1 by if needed reduce Q
     var Q_value = document.getElementById("Q_number").value;
@@ -391,7 +400,7 @@ function I_set_all(I_value) {
 
 // Update Q value and other entities as well
 function Q_set_all(Q_value) {
-    Q_set(Q_value);
+    Q_value = Q_set(Q_value);
 
     // Secure that Mag is <= 1 by if needed reduce Q
     var I_value = document.getElementById("I_number").value;
@@ -458,10 +467,6 @@ function configPolarCanvasEvents() {
 
 function polarXYtoIQ(x, y) {
     var polar_canvas = document.getElementById("polar-canvas");
-    var I_range = document.getElementById("I_range");
-    var I_number = document.getElementById("I_number");
-    var Q_range = document.getElementById("Q_range");
-    var Q_number = document.getElementById("Q_number");
 
     var amplitudePx = (polar_canvas.height / 2) / Math.sqrt(2);
     var centerX = polar_canvas.width / 2;
@@ -469,22 +474,15 @@ function polarXYtoIQ(x, y) {
 
 
     var I_value = (x - centerX) / amplitudePx;
-    I_value = Math.round(I_value * 100) / 100;
-    I_value = Math.min(I_value, 1);
-    I_value = Math.max(I_value, -1);
+    I_set(I_value);
 
     var Q_value = (centerY - y) / amplitudePx;
-    Q_value = Math.round(Q_value * 100) / 100;
-    Q_value = Math.min(Q_value, 1);
-    Q_value = Math.max(Q_value, -1);
+    Q_set(Q_value);
 
-    I_number.value = I_value;
-    I_range.value  = I_value;
+    Ang_set(Ang_calc(I_value, Q_value));
 
-    Q_number.value = Q_value;
-    Q_range.value  = Q_value;
-
-    updateDisplay();
+    // Will align all and display
+    Mag_set_all(Mag_calc(I_value, Q_value));
 }
 
 </script>
@@ -513,9 +511,9 @@ function polarXYtoIQ(x, y) {
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:goldenrod">Ang</b></div>
-        <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="0.01" size="4">
+        <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="1" size="4">
         <br>
-        <input id="Ang_range" type="range" min="0" max="360" value="1" step="0.01">
+        <input id="Ang_range" type="range" min="0" max="360" value="1" step="1">
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:lightgreen">Carrier</b></div>
