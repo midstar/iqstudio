@@ -82,32 +82,7 @@ window.onload = function() {
     });
 
     // Handle click in the polar canvas
-    var polar_canvas = document.getElementById("polar-canvas");
-    polar_canvas.addEventListener('click', function (e) {
-        var amplitudePx = (polar_canvas.height / 2) / Math.sqrt(2);
-        var centerX = polar_canvas.width / 2;
-        var centerY = polar_canvas.height / 2;
-
-
-        var I_value = (event.offsetX - centerX) / amplitudePx;
-        I_value = Math.round(I_value * 100) / 100;
-        I_value = Math.min(I_value, 1);
-        I_value = Math.max(I_value, -1);
-
-        var Q_value = (centerY - event.offsetY) / amplitudePx;
-        Q_value = Math.round(Q_value * 100) / 100;
-        Q_value = Math.min(Q_value, 1);
-        Q_value = Math.max(Q_value, -1);
-
-        I_number.value = I_value;
-        I_range.value  = I_value;
-
-        Q_number.value = Q_value;
-        Q_range.value  = Q_value;
-
-        updateDisplay();
-    });
-
+    configPolarCanvasEvents();
 }
 
 function updateDisplay() {
@@ -330,6 +305,57 @@ function plotFunc(ctx, periodPx, startY, startX, endX,
     ctx.stroke();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Selecting I/Q on the polar plot
+///////////////////////////////////////////////////////////////////////////////
+
+var mouseDown = false;
+
+function configPolarCanvasEvents() {
+    var polar_canvas = document.getElementById("polar-canvas");
+    polar_canvas.addEventListener('mouseup', function (e) {
+        mouseDown = false;
+    });
+    polar_canvas.addEventListener('mousedown', function (e) {
+        mouseDown = true;
+        polarXYtoIQ(event.offsetX, event.offsetY);
+    });
+    polar_canvas.addEventListener('mousemove', function (e) {
+        if (mouseDown)
+            polarXYtoIQ(event.offsetX, event.offsetY);
+    });
+}
+
+function polarXYtoIQ(x, y) {
+    var polar_canvas = document.getElementById("polar-canvas");
+    var I_range = document.getElementById("I_range");
+    var I_number = document.getElementById("I_number");
+    var Q_range = document.getElementById("Q_range");
+    var Q_number = document.getElementById("Q_number");
+
+    var amplitudePx = (polar_canvas.height / 2) / Math.sqrt(2);
+    var centerX = polar_canvas.width / 2;
+    var centerY = polar_canvas.height / 2;
+
+
+    var I_value = (x - centerX) / amplitudePx;
+    I_value = Math.round(I_value * 100) / 100;
+    I_value = Math.min(I_value, 1);
+    I_value = Math.max(I_value, -1);
+
+    var Q_value = (centerY - y) / amplitudePx;
+    Q_value = Math.round(Q_value * 100) / 100;
+    Q_value = Math.min(Q_value, 1);
+    Q_value = Math.max(Q_value, -1);
+
+    I_number.value = I_value;
+    I_range.value  = I_value;
+
+    Q_number.value = Q_value;
+    Q_range.value  = Q_value;
+
+    updateDisplay();
+}
 
 </script>
 
