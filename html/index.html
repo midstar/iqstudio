@@ -61,23 +61,43 @@ window.onload = function() {
     var I_range = document.getElementById("I_range");
     var I_number = document.getElementById("I_number");
     I_range.addEventListener('input', function (e) {
-        I_number.value = e.target.value;
-        updateDisplay();
+        I_set(e.target.value);
     });
     I_number.addEventListener('input', function (e) {
-        I_range.value = e.target.value;
-        updateDisplay();
+        I_set(e.target.value);
     });
 
     // Synchronize range and number inputs - Q
     var Q_range = document.getElementById("Q_range");
     var Q_number = document.getElementById("Q_number");
     Q_range.addEventListener('input', function (e) {
-        Q_number.value = e.target.value;
-        updateDisplay();
+        Q_set(e.target.value);
     });
     Q_number.addEventListener('input', function (e) {
-        Q_range.value = e.target.value;
+        Q_set(e.target.value);
+    });
+
+    // Synchronize range and number inputs - Mag
+    var Mag_range = document.getElementById("Mag_range");
+    var Mag_number = document.getElementById("Mag_number");
+    Mag_range.addEventListener('input', function (e) {
+        Mag_number.value = e.target.value;
+        updateDisplay();
+    });
+    Mag_number.addEventListener('input', function (e) {
+        Mag_range.value = e.target.value;
+        updateDisplay();
+    });
+
+    // Synchronize range and number inputs - Ang
+    var Ang_range = document.getElementById("Ang_range");
+    var Ang_number = document.getElementById("Ang_number");
+    Ang_range.addEventListener('input', function (e) {
+        Ang_number.value = e.target.value;
+        updateDisplay();
+    });
+    Ang_number.addEventListener('input', function (e) {
+        Ang_range.value = e.target.value;
         updateDisplay();
     });
 
@@ -306,6 +326,45 @@ function plotFunc(ctx, periodPx, startY, startX, endX,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Misc calculations
+///////////////////////////////////////////////////////////////////////////////
+
+function round(value) {
+    return Math.round(value * 100) / 100;
+}
+
+function I_set(I_value) {
+    document.getElementById("I_number").value = I_value;
+    document.getElementById("I_range").value = I_value;
+
+    // Secure that Mag is <= 1 by if needed reduce Q
+    var Q_value = document.getElementById("Q_number").value;
+    if (Math.hypot(I_value, Q_value) > 1) {
+        Q_value = round(Math.sqrt(1 - I_value * I_value) * Math.sign(Q_value));
+        document.getElementById("Q_number").value = Q_value;
+        document.getElementById("Q_range").value = Q_value;
+    }
+
+    updateDisplay();
+}
+
+function Q_set(Q_value) {
+    document.getElementById("Q_number").value = Q_value;
+    document.getElementById("Q_range").value = Q_value;
+
+    // Secure that Mag is <= 1 by if needed reduce Q
+    var I_value = document.getElementById("I_number").value;
+    if (Math.hypot(I_value, Q_value) > 1) {
+        I_value = round(Math.sqrt(1 - Q_value * Q_value) * Math.sign(I_value));
+        document.getElementById("I_number").value = I_value;
+        document.getElementById("I_range").value = I_value;
+    }
+
+    updateDisplay();
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Selecting I/Q on the polar plot
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -374,6 +433,18 @@ function polarXYtoIQ(x, y) {
         <input id="Q_plot" type="checkbox" checked onchange="updateDisplay()">
         <br>
         <input id="Q_range" type="range" min="-1" max="1" value="0" step="0.01">
+    </div>
+    <div class="select-container">
+        <div class="select-label"><b style="color:green">Mag</b></div>
+        <input id="Mag_number" type="number" id="quantity" name="quantity" min="0" max="1" value="0" step="0.01" size="4">
+        <br>
+        <input id="Mag_range" type="range" min="0" max="1" value="1" step="0.01">
+    </div>
+    <div class="select-container">
+        <div class="select-label"><b style="color:goldenrod">Ang</b></div>
+        <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="0.01" size="4">
+        <br>
+        <input id="Ang_range" type="range" min="0" max="360" value="1" step="0.1">
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:lightgreen">Carrier</b></div>
