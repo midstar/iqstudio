@@ -23,22 +23,28 @@ canvas {
 
 .select-label {
     display: inline-block;
-    width: 60px;
+    width: 40px;
     text-align:center;
+}
+
+.plot-label {
+    display: inline-block;
+    width: 80px;
+    text-align:left;
+    font-size: 11px;
 }
 
 .notation-container {
     font-size: 10px;
 }
 
-#I_range, #Q_range {
-    width: 100%;
+input[type=range] {
+  width: 105px; 
 }
 
-#I_plot, #Q_plot {
-    float: right;
+input[type=number] {
+  width: 65px; 
 }
-
 
 </style>
 </head>
@@ -492,20 +498,18 @@ function polarXYtoIQ(x, y) {
     <div class="select-container">
         <div class="select-label"><b style="color:red">I</b></div>
         <input id="I_number" type="number" id="quantity" name="quantity" min="-1" max="1" value="1" step="0.01" size="4">
-        <input id="I_plot" type="checkbox" checked onchange="updateDisplay()">
         <br>
         <input id="I_range" type="range" min="-1" max="1" value="1" step="0.01">
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:blue">Q</b></div>
         <input id="Q_number" type="number" id="quantity" name="quantity" min="-1" max="1" value="0" step="0.01" size="4">
-        <input id="Q_plot" type="checkbox" checked onchange="updateDisplay()">
         <br>
         <input id="Q_range" type="range" min="-1" max="1" value="0" step="0.01">
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:green">Mag</b></div>
-        <input id="Mag_number" type="number" id="quantity" name="quantity" min="0" max="1" value="0" step="0.01" size="4">
+        <input id="Mag_number" type="number" id="quantity" name="quantity" min="0" max="1" value="1" step="0.01" size="4">
         <br>
         <input id="Mag_range" type="range" min="0" max="1" value="1" step="0.01">
     </div>
@@ -513,14 +517,26 @@ function polarXYtoIQ(x, y) {
         <div class="select-label"><b style="color:goldenrod">Ang</b></div>
         <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="1" size="4">
         <br>
-        <input id="Ang_range" type="range" min="0" max="360" value="1" step="1">
+        <input id="Ang_range" type="range" min="0" max="360" value="0" step="1">
     </div>
     <div class="select-container">
-        <div class="select-label"><b style="color:lightgreen">Carrier</b></div>
-        <input id="Carrier_plot" type="checkbox" checked onchange="updateDisplay()">
+        <div class="plot-label">
+            <input id="I_plot" type="checkbox" checked onchange="updateDisplay()">
+            <b style="color:red">I signal</b>
+        </div>
+        <div class="plot-label">
+            <input id="Carrier_plot" type="checkbox" checked onchange="updateDisplay()">
+            <b style="color:lightgreen">Carrier</b>
+        </div> 
         <br>
-        <div class="select-label"><b style="color:green">RF</b></div>
-        <input id="RF_plot" type="checkbox" checked onchange="updateDisplay()">
+        <div class="plot-label">
+            <input id="Q_plot" type="checkbox" checked onchange="updateDisplay()">
+            <b style="color:blue">Q signal</b>
+        </div>
+        <div class="plot-label">
+            <input id="RF_plot" type="checkbox" checked onchange="updateDisplay()">
+            <b style="color:green">RF</b>
+        </div>
     </div>
     <div class="notation-container">
         <div><b>Rectangular notation:</b></div>
