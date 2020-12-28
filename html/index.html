@@ -122,6 +122,8 @@ function updateDisplay() {
 function updateNotation() {
     var I_value = document.getElementById("I_number").value;
     var Q_value = document.getElementById("Q_number").value;
+    var Mag_value = document.getElementById("Mag_number").value;
+    var Ang_value = document.getElementById("Ang_number").value;
     var rect_notation = document.getElementById("rect-notation");
     var polar_notation = document.getElementById("polar-notation");
 
@@ -129,23 +131,16 @@ function updateNotation() {
         rect_notation.innerHTML = I_value + " + " + Q_value + " i";
     else
         rect_notation.innerHTML = I_value + " - " + Math.abs(Q_value) + " i";
-    
-    var RF_amplitude = Math.round(Math.hypot(I_value, Q_value) * 100)/100;
-    var RF_angle = Math.round(Math.atan(Q_value / I_value) * 100)/100;
-    if (I_value < 0)
-        RF_angle = Math.PI + RF_angle;
-    else if (Q_value < 0)
-        RF_angle = 2 * Math.PI + RF_angle;
 
-    RF_angle = Math.round(RF_angle * 100)/100;
-
-    polar_notation.innerHTML = RF_amplitude + ", " + RF_angle + " radians";
+    var Ang_value_rad = round(Ang_value * DEG_TO_RAD);
+    polar_notation.innerHTML = Mag_value + ", " + Ang_value_rad + " radians";
 
 }
 
 function plotPolar(canvasId) {
     var I_value = document.getElementById("I_number").value;
     var Q_value = document.getElementById("Q_number").value;
+    var Ang_value = document.getElementById("Ang_number").value;
 
     var canvas = document.getElementById(canvasId);
     var ctx = canvas.getContext("2d");
@@ -168,6 +163,14 @@ function plotPolar(canvasId) {
     ctx.moveTo(centerX, centerY - amplitudePx * 1.1);
     ctx.lineTo(centerX, centerY + amplitudePx * 1.1);
     ctx.strokeStyle = "goldenrod";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Angle
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, amplitudePx * 0.1, 
+            0, -1 * Ang_value * DEG_TO_RAD, true);
+    ctx.strokeStyle = "purple";
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -514,7 +517,7 @@ function polarXYtoIQ(x, y) {
         <input id="Mag_range" type="range" min="0" max="1" value="1" step="0.01">
     </div>
     <div class="select-container">
-        <div class="select-label"><b style="color:goldenrod">Ang</b></div>
+        <div class="select-label"><b style="color:purple">Ang</b></div>
         <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="1" size="4">
         <br>
         <input id="Ang_range" type="range" min="0" max="360" value="0" step="1">
