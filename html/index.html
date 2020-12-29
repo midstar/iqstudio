@@ -37,6 +37,7 @@ canvas {
 
 .notation-container {
     font-size: 10px;
+    width: 60px;
 }
 
 input[type=range] {
@@ -138,7 +139,7 @@ function updateNotation() {
         rect_notation.innerHTML = I_value + " - " + Math.abs(Q_value) + " i";
 
     var Ang_value_rad = round(Ang_value * DEG_TO_RAD);
-    polar_notation.innerHTML = Mag_value + ", " + Ang_value_rad + " radians";
+    polar_notation.innerHTML = Mag_value + ", " + Ang_value_rad + " rad";
 
 }
 
@@ -563,12 +564,12 @@ function polarXYtoIQ(x, y) {
         </div>
     </div>
     <div class="notation-container">
-        <div><b>Rectangular notation:</b></div>
+        <div><b>Rectangular<br>notation:</b></div>
         <div id="rect-notation">0.45 + 0.66 * i</div>
     </div>
     <div class="notation-container">
-        <div><b>Polar notation:</b></div>
-        <div id="polar-notation">0.45, 2.3 radians</div>
+        <div><b>Polar<br>notation:</b></div>
+        <div id="polar-notation">0.45, 2.3 rad</div>
     </div>
     <br>
     <canvas id="polar-canvas" height="200" width="200"></canvas>
