@@ -114,6 +114,10 @@ function updateDisplay() {
     var polar_canvas = document.getElementById("polar-canvas");
     var signal_canvas = document.getElementById("signal-canvas");
     signal_canvas.width = width - polar_canvas.width - 20;
+    if (signal_canvas.width < polar_canvas.width) {
+        // Put signal canvas below polar canvas for small screens
+        signal_canvas.width = width;
+    }
 
     updateNotation();
     plotPolar("polar-canvas");
