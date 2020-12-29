@@ -41,11 +41,12 @@ canvas {
 }
 
 input[type=range] {
-  width: 105px; 
+  width: 90px; 
 }
 
 input[type=number] {
-  width: 65px; 
+  font-size: 10px;
+  width: 50px; 
 }
 
 </style>
@@ -86,7 +87,7 @@ window.onload = function() {
         Q_set_all(e.target.value);
     });
 
-    // Synchronize range and number inputs - Mag
+    // Synchronize range and number inputs - Magnitude
     var Mag_range = document.getElementById("Mag_range");
     var Mag_number = document.getElementById("Mag_number");
     Mag_range.addEventListener('input', function (e) {
@@ -96,7 +97,7 @@ window.onload = function() {
         Mag_set_all(e.target.value);
     });
 
-    // Synchronize range and number inputs - Ang
+    // Synchronize range and number inputs - Angle
     var Ang_range = document.getElementById("Ang_range");
     var Ang_number = document.getElementById("Ang_number");
     Ang_range.addEventListener('input', function (e) {
@@ -104,6 +105,18 @@ window.onload = function() {
     });
     Ang_number.addEventListener('input', function (e) {
         Ang_set_all(e.target.value);
+    });
+
+    // Synchronize range and number inputs - Period
+    var Per_range = document.getElementById("Per_range");
+    var Per_number = document.getElementById("Per_number");
+    Per_range.addEventListener('input', function (e) {
+        Per_number.value = e.target.value; 
+        updateDisplay();
+    });
+    Per_number.addEventListener('input', function (e) {
+        Per_range.value = e.target.value; 
+        updateDisplay();
     });
 
     // Handle click in the polar canvas
@@ -222,6 +235,7 @@ function plotPolar(canvasId) {
 function plotSignals(canvasId) {
     var I_value = document.getElementById("I_number").value;
     var Q_value = document.getElementById("Q_number").value;
+    var periodPx = document.getElementById("Per_number").value;
     var I_plot = document.getElementById("I_plot").checked;
     var Q_plot = document.getElementById("Q_plot").checked;
     var Carrier_plot = document.getElementById("Carrier_plot").checked;
@@ -234,7 +248,6 @@ function plotSignals(canvasId) {
 
     var offsetPx = 5;
     var amplitudePx = (canvas.height / 2) / Math.sqrt(2);
-    var periodPx = 100;
     var startY = canvas.height / 2;
     var endX = canvas.width - offsetPx;
 
@@ -543,6 +556,12 @@ function polarXYtoIQ(x, y) {
         <input id="Ang_number" type="number" id="quantity" name="quantity" min="0" max="360" value="0" step="1" size="4">
         <br>
         <input id="Ang_range" type="range" min="0" max="360" value="0" step="1">
+    </div>
+    <div class="select-container">
+        <div class="select-label"><b style="color:black">Per</b></div>
+        <input id="Per_number" type="number" id="quantity" name="quantity" min="10" max="20" value="100" step="1" size="4">
+        <br>
+        <input id="Per_range" type="range" min="10" max="200" value="100" step="1">
     </div>
     <div class="select-container">
         <div class="plot-label">
