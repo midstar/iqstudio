@@ -53,6 +53,11 @@ input[type=number] {
   width: 50px; 
 }
 
+button {
+    height: 25px;
+    margin-bottom: 2px;
+}
+
 </style>
 </head>
 <script>
@@ -550,6 +555,11 @@ function modulationInsert() {
     updateModulationPlot();
 }
 
+function modulationClear() {
+    modulationValues = [];
+    document.getElementById("modulation-canvas").width = 10;
+}
+
 function updateModulationPlot() {
     if (modulationValues.length > 0) {
         plotModulation("modulation-canvas");
@@ -696,8 +706,9 @@ function plotModulation(canvasId) {
     <hr>
 
     <button onclick="modulationInsert()">Insert &dArr;</button>
+    <button onclick="modulationClear()">Clear &#128465;</button>
     <div id="modulation-canvas-container">
-        <canvas id="modulation-canvas" height="200"></canvas>
+        <canvas id="modulation-canvas" height="200" width="10"></canvas>
     </div>
 
 </body>
