@@ -576,6 +576,7 @@ function modulationInsert() {
     modulationValuesSel = modulationValues.length - 1;
     updateModulationPlot();
     document.getElementById("button-replace").disabled=false;
+    document.getElementById("button-delete").disabled=false;
     document.getElementById("button-clear").disabled=false;
 }
 
@@ -586,11 +587,28 @@ function modulationReplace() {
     updateModulationPlot();
 }
 
+function modulationDelete() {
+    if (modulationValues.length == 1) {
+        modulationClear();
+    } else {
+        modulationValues.splice(modulationValuesSel, 1);
+        modulationValuesSel--;
+        if (modulationValuesSel < 0 && modulationValues.length > 0)
+            modulationValuesSel=0;
+        updateModulationPlot();
+
+        // Update I/Q plot
+        I_set(modulationValues[modulationValuesSel][0]);
+        Q_set_all(modulationValues[modulationValuesSel][1]);
+    }
+}
+
 function modulationClear() {
     modulationValues = [];
     modulationValuesSel = -1;
     document.getElementById("modulation-canvas").width = 10;
     document.getElementById("button-replace").disabled=true;
+    document.getElementById("button-delete").disabled=true;
     document.getElementById("button-clear").disabled=true;
 }
 
@@ -761,7 +779,8 @@ function plotSelectors(ctx, width, height, periodPx, offsetPx, selIndex) {
 
     <button onclick="modulationInsert()">Add &dArr;</button>
     <button id="button-replace" onclick="modulationReplace()" disabled>Replace &dArr;</button>
-    <button id="button-clear" onclick="modulationClear()" disabled>Clear &#128465;</button>
+    <button id="button-delete" onclick="modulationDelete()" disabled>Delete &#128465;</button>
+    <button id="button-clear" onclick="modulationClear()" disabled>Clear all &#128465;</button>
     <div id="modulation-canvas-container">
         <canvas id="modulation-canvas" height="200" width="10"></canvas>
     </div>
