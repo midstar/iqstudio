@@ -60,6 +60,53 @@ button {
     padding-right: 0px;
 }
 
+/***********************************
+Import / export window
+************************************/
+
+#import-export-view {
+    position: fixed; 
+    width: 260px;
+    left: 50%;
+    margin-left: -130px; /* Negative half of width. */
+    height: 96%;
+    top: 2%;
+    z-index: 2; /* Sit on top */
+    overflow-x: hidden;
+    overflow-y: hidden;
+    background-color: white;
+    border:2px solid lightgray;
+    display: none; /* Hidden by default */
+
+
+    /* Add Animation (when opening) */
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+textarea {
+    width: 100%;
+    height: calc(100% - 78px);
+    resize: none;
+}
+
+#import-export-view-readme {
+    height: 50px;
+    font-size: 10px;
+}
+
+#import-export-view-buttons {
+    height: 28px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+#button-import {
+    float:right;
+}
+
 </style>
 </head>
 <script>
@@ -547,6 +594,7 @@ function polarXYtoIQ(x, y) {
 }
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Below code is for the modulation plot
 ///////////////////////////////////////////////////////////////////////////////
@@ -710,6 +758,65 @@ function plotSelectors(ctx, width, height, periodPx, offsetPx, selIndex) {
     }
 }
 
+function modulationImportExportOpen() {
+    var text = "";
+    for (var i=0 ; i < modulationValues.length ; i++) {
+        text += modulationValues[i][0]+","+modulationValues[i][1]+"\n";
+    }
+    document.getElementById("import-export-textarea").value = text;
+    
+    document.getElementById("import-export-view").style.display = "block";
+}
+
+function modulationImportExportClose() {
+    document.getElementById("import-export-view").style.display = "none";
+}
+
+function modulationImport() {
+    var text = document.getElementById("import-export-textarea").value;
+    modulationClear();
+    if (text.trim() != "") {
+        var lines = text.split(/\r?\n/);
+        var lineNumber = 1;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.trim() == "") {
+                // Empty line - skip it
+                lineNumber++;
+                continue;
+            }
+            var words = line.trim().split(/[ ,;]+/);
+            if (words.length != 2) {
+                alert("Invalid format on line " + lineNumber + ":\n\n" + line);
+                return;
+            }
+            var I_value = parseFloat(words[0]);
+            var Q_value = parseFloat(words[1]);
+            if (I_value < -1 || I_value > 1 || Q_value < -1 || Q_value > 1) {
+                alert("Invalid format on line " + lineNumber + ":\n\n" + line +
+                      "\n\nI and Q range shall be -1.0 to 1.0");
+                return;
+            }
+            modulationValues.push([I_value, Q_value]);
+
+            lineNumber++;
+        }
+        
+    }
+    if (modulationValues.length > 0) {
+        modulationValuesSel = modulationValues.length - 1; 
+        document.getElementById("button-replace").disabled=false;
+        document.getElementById("button-delete").disabled=false;
+        document.getElementById("button-clear").disabled=false;
+
+        // Update I/Q plot
+        I_set(modulationValues[modulationValuesSel][0]);
+        Q_set_all(modulationValues[modulationValuesSel][1]);
+    }   
+    modulationImportExportClose();
+    updateModulationPlot();
+}
+
 </script>
 
 <body onresize="updateDisplay()">
@@ -781,8 +888,22 @@ function plotSelectors(ctx, width, height, periodPx, offsetPx, selIndex) {
     <button id="button-replace" onclick="modulationReplace()" disabled>Replace &dArr;</button>
     <button id="button-delete" onclick="modulationDelete()" disabled>Delete &#128465;</button>
     <button id="button-clear" onclick="modulationClear()" disabled>Clear all &#128465;</button>
+    <button id="button-import-export" onclick="modulationImportExportOpen()">Import/Export</button>
     <div id="modulation-canvas-container">
         <canvas id="modulation-canvas" height="200" width="10"></canvas>
+    </div>
+
+    <div id="import-export-view">
+        <div id="import-export-view-readme">
+            Format:<br>
+            I,Q
+            <p><i>Space, TAB and ; are also allowed separtors.</i></p>
+        </div>
+        <textarea id="import-export-textarea"></textarea><br>
+        <div id="import-export-view-buttons">
+            <button onclick="modulationImportExportClose()">Cancel</button>
+            <button id="button-import" onclick="modulationImport()">Import</button>
+        </div>
     </div>
 
 </body>
