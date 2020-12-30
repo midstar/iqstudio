@@ -10,6 +10,10 @@ canvas {
     margin-bottom: 5px;
 }
 
+#modulation-canvas-container {
+    overflow: scroll;
+}
+
 #polar-canvas {
     cursor: crosshair;
 }
@@ -113,10 +117,12 @@ window.onload = function() {
     Per_range.addEventListener('input', function (e) {
         Per_number.value = e.target.value; 
         updateDisplay();
+        updateModulationPlot();
     });
     Per_number.addEventListener('input', function (e) {
         Per_range.value = e.target.value; 
         updateDisplay();
+        updateModulationPlot();
     });
 
     // Handle click in the polar canvas
@@ -127,6 +133,7 @@ function updateDisplay() {
     var width = document.body.offsetWidth;
     var polar_canvas = document.getElementById("polar-canvas");
     var signal_canvas = document.getElementById("signal-canvas");
+
     signal_canvas.width = width - polar_canvas.width - 20;
     if (signal_canvas.width < polar_canvas.width) {
         // Put signal canvas below polar canvas for small screens
@@ -529,6 +536,98 @@ function polarXYtoIQ(x, y) {
     Mag_set_all(Mag_calc(I_value, Q_value));
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Below code is for the modulation plot
+///////////////////////////////////////////////////////////////////////////////
+
+var modulationValues = [];
+
+function modulationInsert() {
+    var I_value = document.getElementById("I_number").value;
+    var Q_value = document.getElementById("Q_number").value;
+    modulationValues.push([I_value, Q_value]);
+    updateModulationPlot();
+}
+
+function updateModulationPlot() {
+    if (modulationValues.length > 0) {
+        plotModulation("modulation-canvas");
+    }
+}
+
+function plotModulation(canvasId) {
+
+    var periodPx = document.getElementById("Per_number").value;
+    var I_plot = document.getElementById("I_plot").checked;
+    var Q_plot = document.getElementById("Q_plot").checked;
+    var Carrier_plot = document.getElementById("Carrier_plot").checked;
+    var RF_plot = document.getElementById("RF_plot").checked;
+
+    var canvas = document.getElementById(canvasId);
+
+    var offsetPx = 5;
+    // Set canvas width
+    var width = modulationValues.length * periodPx + 2 * offsetPx;
+    var amplitudePx = (canvas.height / 2) / Math.sqrt(2);
+    var startY = canvas.height / 2;
+    var endX = width - offsetPx;
+
+    canvas.width = width;
+    var ctx = canvas.getContext("2d");
+
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    plotGrid(ctx, canvas.width, canvas.height, 10, false);
+
+    Get_I = function (angle) {
+        var index = Math.max(Math.ceil(angle / 360) - 1, 0);
+        return modulationValues[index][0];
+    };
+
+    Get_Q = function (angle) {
+        var index = Math.max(Math.ceil(angle / 360) - 1, 0);
+        return modulationValues[index][1];
+    };
+
+    Carrier_func = function (angle) {
+        return amplitudePx * Math.cos(angle * DEG_TO_RAD);
+    };
+
+    I_func = function (angle) {
+        return Get_I(angle) * amplitudePx * Math.cos(angle * DEG_TO_RAD);
+    };
+
+    Q_func = function (angle) {
+        return Get_Q(angle) * amplitudePx * Math.sin(angle * DEG_TO_RAD);
+    };
+
+    RF_func = function (angle) {
+        return I_func(angle) + Q_func(angle);
+    };
+
+    if (Carrier_plot) {
+        plotFunc(ctx, periodPx, startY, offsetPx, endX,
+                "lightgreen", Carrier_func);
+    }
+
+    if (I_plot) {
+        plotFunc(ctx, periodPx, startY, offsetPx, endX,
+                "red", I_func);
+    }
+
+    if (Q_plot) {
+        plotFunc(ctx, periodPx, startY, offsetPx, endX,
+                "blue", Q_func);
+    }
+
+    if (RF_plot) {
+        plotFunc(ctx, periodPx, startY, offsetPx, endX,
+                "green", RF_func);
+    }
+}
+
 </script>
 
 <body onresize="updateDisplay()">
@@ -565,20 +664,20 @@ function polarXYtoIQ(x, y) {
     </div>
     <div class="select-container">
         <div class="plot-label">
-            <input id="I_plot" type="checkbox" checked onchange="updateDisplay()">
+            <input id="I_plot" type="checkbox" checked onchange="updateDisplay();updateModulationPlot();">
             <b style="color:red">I signal</b>
         </div>
         <div class="plot-label">
-            <input id="Carrier_plot" type="checkbox" checked onchange="updateDisplay()">
+            <input id="Carrier_plot" type="checkbox" checked onchange="updateDisplay();updateModulationPlot();">
             <b style="color:lightgreen">Carrier</b>
         </div> 
         <br>
         <div class="plot-label">
-            <input id="Q_plot" type="checkbox" checked onchange="updateDisplay()">
+            <input id="Q_plot" type="checkbox" checked onchange="updateDisplay();updateModulationPlot();">
             <b style="color:blue">Q signal</b>
         </div>
         <div class="plot-label">
-            <input id="RF_plot" type="checkbox" checked onchange="updateDisplay()">
+            <input id="RF_plot" type="checkbox" checked onchange="updateDisplay();updateModulationPlot();">
             <b style="color:green">RF</b>
         </div>
     </div>
@@ -593,6 +692,13 @@ function polarXYtoIQ(x, y) {
     <br>
     <canvas id="polar-canvas" height="200" width="200"></canvas>
     <canvas id="signal-canvas" height="200"></canvas>
+
+    <hr>
+
+    <button onclick="modulationInsert()">Insert &dArr;</button>
+    <div id="modulation-canvas-container">
+        <canvas id="modulation-canvas" height="200"></canvas>
+    </div>
 
 </body>
 </html>
