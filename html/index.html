@@ -132,6 +132,9 @@ window.onload = function() {
 
     // Handle click in the polar canvas
     configPolarCanvasEvents();
+
+    // Handle click in the modulation canvas
+    configModulationCanvasEvents();
 }
 
 function updateDisplay() {
@@ -547,16 +550,34 @@ function polarXYtoIQ(x, y) {
 ///////////////////////////////////////////////////////////////////////////////
 
 var modulationValues = [];
+var modulationValuesSel = -1;
+
+function configModulationCanvasEvents() {
+    var modulation_canvas = document.getElementById("modulation-canvas");
+    modulation_canvas.addEventListener('click', function (e) {
+        var periodPx = parseInt(document.getElementById("Per_number").value);
+        var offsetPx = 5; // Needs to be in line with plotModulation
+        x = e.offsetX - offsetPx;
+        modulationValuesSel = Math.floor(x / periodPx);
+        updateModulationPlot();
+
+        // Update I/Q plot
+        I_set(modulationValues[modulationValuesSel][0]);
+        Q_set_all(modulationValues[modulationValuesSel][1]);
+    });
+}
 
 function modulationInsert() {
     var I_value = document.getElementById("I_number").value;
     var Q_value = document.getElementById("Q_number").value;
     modulationValues.push([I_value, Q_value]);
+    modulationValuesSel = modulationValues.length - 1;
     updateModulationPlot();
 }
 
 function modulationClear() {
     modulationValues = [];
+    modulationValuesSel = -1;
     document.getElementById("modulation-canvas").width = 10;
 }
 
@@ -568,7 +589,7 @@ function updateModulationPlot() {
 
 function plotModulation(canvasId) {
 
-    var periodPx = document.getElementById("Per_number").value;
+    var periodPx = parseInt(document.getElementById("Per_number").value);
     var I_plot = document.getElementById("I_plot").checked;
     var Q_plot = document.getElementById("Q_plot").checked;
     var Carrier_plot = document.getElementById("Carrier_plot").checked;
@@ -590,6 +611,7 @@ function plotModulation(canvasId) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     plotGrid(ctx, canvas.width, canvas.height, 10, false);
+    plotSelectors(ctx, canvas.width, canvas.height, periodPx, offsetPx, modulationValuesSel);
 
     Get_I = function (angle) {
         var index = Math.max(Math.ceil(angle / 360) - 1, 0);
@@ -638,6 +660,25 @@ function plotModulation(canvasId) {
     }
 }
 
+function plotSelectors(ctx, width, height, periodPx, offsetPx, selIndex) {
+    index = 0;
+    for (var x = periodPx / 2 + offsetPx ; x < width ; x += periodPx) {
+        // Creat circle
+        ctx.beginPath();
+        ctx.arc(x, 10, 5, 0, 2 * Math.PI);
+        if (selIndex == index)
+            ctx.fillStyle = "yellow";
+        else
+            ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        index++;
+    }
+}
+
 </script>
 
 <body onresize="updateDisplay()">
@@ -668,7 +709,7 @@ function plotModulation(canvasId) {
     </div>
     <div class="select-container">
         <div class="select-label"><b style="color:black">Per</b></div>
-        <input id="Per_number" type="number" id="quantity" name="quantity" min="10" max="20" value="100" step="1" size="4">
+        <input id="Per_number" type="number" id="quantity" name="quantity" min="10" max="200" value="100" step="1" size="4">
         <br>
         <input id="Per_range" type="range" min="10" max="200" value="100" step="1">
     </div>
